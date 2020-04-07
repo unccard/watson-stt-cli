@@ -147,4 +147,4 @@ static
 *.wav
 
 .vscode
-ibm.json
+config.json
