@@ -145,6 +145,7 @@ static
 # audio files
 *.flac
 *.wav
+*.opus
 
 .vscode
 config.json
