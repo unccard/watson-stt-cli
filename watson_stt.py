@@ -1,5 +1,6 @@
 import click
 import json
+import concurrent.futures
 from ibm_watson import SpeechToTextV1
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
@@ -23,3 +24,24 @@ def _transcribe_sync(audio_filepath):
             word_confidence=True,
             end_of_phrase_silence_time=30.0)
         return response
+
+def combine_transcriptions(json_object):
+    transcripts = map(lambda x: x['alternatives'][0]['transcript'], json_object['results'])
+    return '\n'.join(transcripts)
+
+def get_transcript(filepath):
+    response = _transcribe_sync(filepath)
+    json_filepath = filepath.replace('.opus', '.json')
+    txt_filepath = filepath.replace('.opus', '.txt')
+    with open(json_filepath, 'w') as json_outfile:
+        json.dump(response.result, json_outfile, indent=4)
+    transcript = combine_transcriptions(response.result)
+    with open(txt_filepath, 'w') as txt_outfile:
+        txt_outfile.write(transcript)
+
+if __name__ == "__main__":
+    import glob
+    infiles = glob.glob('*.opus')
+    with concurrent.futures.ThreadPoolExecutor(min(len(infiles), 16)) as executor:
+        for infile in infiles:
+            executor.submit(get_transcript, infile)
