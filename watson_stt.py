@@ -19,5 +19,7 @@ def _transcribe_sync(audio_filepath):
         authenticator = IAMAuthenticator(apikey)
         speech_to_text = SpeechToTextV1(authenticator=authenticator)
         speech_to_text.set_service_url(url)
-        response = speech_to_text.recognize(audiofile)
+        response = speech_to_text.recognize(audiofile,
+            word_confidence=True,
+            end_of_phrase_silence_time=30.0)
         return response
