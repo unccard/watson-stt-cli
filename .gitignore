@@ -147,5 +147,8 @@ static
 *.wav
 *.opus
 
+# completed items
+results/
+
 .vscode
 config.json
