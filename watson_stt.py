@@ -19,7 +19,7 @@ if not APIKEY or not APIURL:
     '- Place the "ibm-credentials.env" file in the same directory as this script, then try again']))
 
 @click.command()
-@click.argument("audio_filepath",
+@click.argument("path_to_audio_file",
                 required=True,
                 type=click.Path(exists=True))
 def cli(audio_filepath: str):
