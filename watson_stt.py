@@ -1,25 +1,35 @@
 import click
 import json
-import concurrent.futures
+import os
+import sys
 from ibm_watson import SpeechToTextV1
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+from typing import Final
+from dotenv import load_dotenv
 
-with open("config.json", "r") as configfile:
-    obj = json.load(configfile)
-    apikey, url = obj["apikey"], obj["url"]
+load_dotenv("ibm-credentials.env")
+APIKEY: Final = os.getenv("SPEECH_TO_TEXT_APIKEY")
+APIURL: Final = os.getenv("SPEECH_TO_TEXT_URL")
+if not APIKEY or not APIURL:
+    sys.exit('\n'.join(['[Error] The Watson API key and/or URL are not defined. To fix this:',
+    '- Navigate to "https://cloud.ibm.com/resources" (logging in if needed)',
+    '- Under "Services", select your "Speech to Text" service instance',
+    '- Click "View Full Details"',
+    '- In the "Credentials" pane, click "Download"',
+    '- Place the "ibm-credentials.env" file in the same directory as this script, then try again']))
 
 @click.command()
 @click.argument("audio_filepath",
                 required=True,
                 type=click.Path(exists=True))
-def cli(audio_filepath):
+def cli(audio_filepath: str):
     click.echo(_transcribe_sync(audio_filepath))
 
 def _transcribe_sync(audio_filepath):
     with open(audio_filepath, "rb") as audiofile:
-        authenticator = IAMAuthenticator(apikey)
+        authenticator = IAMAuthenticator(APIKEY)
         speech_to_text = SpeechToTextV1(authenticator=authenticator)
-        speech_to_text.set_service_url(url)
+        speech_to_text.set_service_url(APIURL)
         response = speech_to_text.recognize(audiofile,
             word_confidence=True,
             end_of_phrase_silence_time=30.0)
@@ -40,8 +50,4 @@ def get_transcript(filepath):
         txt_outfile.write(transcript)
 
 if __name__ == "__main__":
-    import glob
-    infiles = glob.glob('*.opus')
-    with concurrent.futures.ThreadPoolExecutor(min(len(infiles), 16)) as executor:
-        for infile in infiles:
-            executor.submit(get_transcript, infile)
+    cli()
