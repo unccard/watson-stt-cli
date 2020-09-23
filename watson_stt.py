@@ -48,6 +48,3 @@ def get_transcript(filepath):
     transcript = combine_transcriptions(response.result)
     with open(txt_filepath, 'w') as txt_outfile:
         txt_outfile.write(transcript)
-
-if __name__ == "__main__":
-    cli()
