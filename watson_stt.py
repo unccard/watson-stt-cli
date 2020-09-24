@@ -4,7 +4,8 @@ import os
 import sys
 from ibm_watson import SpeechToTextV1
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
-from typing import Final
+from ibm_cloud_sdk_core import DetailedResponse
+from typing import Final, List
 from dotenv import load_dotenv
 
 load_dotenv("ibm-credentials.env")
@@ -24,11 +25,20 @@ if not APIKEY or not APIURL:
         )
     )
 
+# defaults
+MIN_WORD_CONFIDENCE: Final = 0.3
+
 
 @click.command()
+@click.option(
+    "--word-confidence-cutoff",
+    default=MIN_WORD_CONFIDENCE,
+    show_default=True,
+    type=click.FloatRange(min=0, max=1.0),
+    help=f"The minimum word confidence level to accept into a transcript. Value should be in the range 0.0 to 1.0.",
+)
 @click.argument("path_to_audio_file", required=True, type=click.Path(exists=True))
-def cli(audio_filepath: str):
-    click.echo(_transcribe_sync(audio_filepath))
+def cli(path_to_audio_file: str, word_confidence_cutoff: float):
 
 
 def _transcribe_sync(audio_filepath):
@@ -46,10 +56,18 @@ def _transcribe_sync(audio_filepath):
         return response
 
 
-def combine_transcriptions(json_object):
-    transcripts = map(
-        lambda x: x["alternatives"][0]["transcript"], json_object["results"]
-    )
+def combine_transcriptions(
+    response: DetailedResponse, word_confidence_cutoff: float
+) -> str:
+    """Combine transcription segments into a single transcription."""
+    transcripts: List[str] = []
+    for result in response.result["results"]:
+        confident_words = [
+            word_item[0]
+            for word_item in result["alternatives"][0]["word_confidence"]
+            if word_item[1] >= word_confidence_cutoff and word_item[0] != "%HESITATION"
+        ]
+        transcripts.append(" ".join(confident_words))
     return "\n".join(transcripts)
 
 
