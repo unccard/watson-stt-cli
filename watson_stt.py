@@ -19,7 +19,8 @@ if not APIKEY or not APIURL:
                 '- Under "Services", select your "Speech to Text" service instance',
                 '- Click "View Full Details"',
                 '- In the "Credentials" pane, click "Download"',
-                '- Place the "ibm-credentials.env" file in the same directory as this script, then try again',
+                '- Navigate to the directory where you saved the "ibm-credentials.env" file',
+                '- Run this script again'
             ]
         )
     )
