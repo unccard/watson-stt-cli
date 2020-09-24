@@ -38,7 +38,10 @@ def _transcribe_sync(audio_filepath):
         speech_to_text.set_default_headers({"X-Watson-Learning-Opt-Out": "true"})
         speech_to_text.set_service_url(APIURL)
         response = speech_to_text.recognize(
-            audiofile, word_confidence=True, end_of_phrase_silence_time=30.0
+            audiofile,
+            word_confidence=True,
+            end_of_phrase_silence_time=30.0,
+            profanity_filter=False,
         )
         return response
 
