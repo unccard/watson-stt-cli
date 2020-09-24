@@ -1,5 +1,4 @@
 import click
-import json
 import os
 import sys
 from ibm_watson import SpeechToTextV1
@@ -39,14 +38,24 @@ MIN_WORD_CONFIDENCE: Final = 0.3
 )
 @click.argument("path_to_audio_file", required=True, type=click.Path(exists=True))
 def cli(path_to_audio_file: str, word_confidence_cutoff: float):
+    response = transcribe_sync(path_to_audio_file)
+    filename, _ = os.path.splitext(os.path.basename(path_to_audio_file))
+    with open(f"{filename}.json", "w") as response_outfile:
+        response_outfile.write(str(response))
+    click.echo(f'Raw response data written to "{filename}.json"')
+    transcript = combine_transcriptions(response, word_confidence_cutoff)
+    with open(f"{filename}.txt", "w") as transcript_outfile:
+        transcript_outfile.write(transcript)
+    click.echo(f'Transcript written to "{filename}.txt"')
 
 
-def _transcribe_sync(audio_filepath):
+def transcribe_sync(audio_filepath: str) -> DetailedResponse:
     with open(audio_filepath, "rb") as audiofile:
         authenticator = IAMAuthenticator(APIKEY)
         speech_to_text = SpeechToTextV1(authenticator=authenticator)
         speech_to_text.set_default_headers({"X-Watson-Learning-Opt-Out": "true"})
         speech_to_text.set_service_url(APIURL)
+        click.echo("Transcribing audio, this may take a while...")
         response = speech_to_text.recognize(
             audiofile,
             word_confidence=True,
@@ -69,14 +78,3 @@ def combine_transcriptions(
         ]
         transcripts.append(" ".join(confident_words))
     return "\n".join(transcripts)
-
-
-def get_transcript(filepath):
-    response = _transcribe_sync(filepath)
-    json_filepath = filepath.replace(".opus", ".json")
-    txt_filepath = filepath.replace(".opus", ".txt")
-    with open(json_filepath, "w") as json_outfile:
-        json.dump(response.result, json_outfile, indent=4)
-    transcript = combine_transcriptions(response.result)
-    with open(txt_filepath, "w") as txt_outfile:
-        txt_outfile.write(transcript)
