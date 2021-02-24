@@ -15,7 +15,7 @@ $ pip install .
    ![Speech to text instance in resource list](docs/service-list.png)
 3. In the "Credentials" pane, select "Download."<br>
    ![Download link for IBM cloud credentials](docs/download-credentials.png)
-4. Save the `ibm-credentials.env` file.
+4. Save the `ibm-credentials.env` file to the `watson-stt-cli` directory.
 
 ## Usage
 Navigate to where you saved your IBM Cloud credentials, then run
