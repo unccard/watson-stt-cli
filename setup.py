@@ -6,6 +6,9 @@ setup(
     py_modules=['watson_stt'],
     install_requires=[
         'Click',
+        'ibm-cloud-sdk-core',
+        'ibm-watson',
+        'python-dotenv'
     ],
     entry_points='''
         [console_scripts]
