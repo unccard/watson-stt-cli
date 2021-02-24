@@ -18,10 +18,19 @@ $ pip install .
 4. Save the `ibm-credentials.env` file and note the directory you saved it in.
 
 ## Usage
-Navigate to where you saved your IBM Cloud credentials, then run
-```
+First, navigate to where you saved your IBM Cloud credentials in step 4 (e.g. `~/Downloads`).
+
+### Single file
+```bash
 $ watson-stt [audiofile]
 ```
-For full usage info, use `watson-stt --help`.
+
+### Multiple files (Mac only)
+On a Mac, multiple files can be transcribed at once using the `find` command. For example, if you wish to transcribe all `.mp3` files in a directory:
+```
+$ find . -iname "*.mp3" -exec watson-stt {} \;
+```
+
+For full usage info and options, type `watson-stt --help`.
 ## License
 MIT
