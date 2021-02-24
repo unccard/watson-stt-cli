@@ -149,6 +149,9 @@ static
 
 # completed items
 results/
+*.txt
+*.json
 
 .vscode
 *.env
+
